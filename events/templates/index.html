@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Planet | مدیریت رویدادها</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0b0d16;
+            --panel: #131827;
+            --panel2: #1a2133;
+            --text: #f4f6ff;
+            --muted: #9da8c2;
+            --accent: #8b5cf6;
+            --accent2: #6d28d9;
+            --accent-soft: rgba(139, 92, 246, .15);
+            --line: rgba(166, 180, 215, .15);
+            --green: #34d399;
+            --red: #fb7185;
+            --gold: #fbbf24;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 12% 0%, rgba(109, 40, 217, .18), transparent 34rem),
+                radial-gradient(ellipse at 100% 18%, rgba(56, 189, 248, .08), transparent 28rem),
+                var(--bg);
+            font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+            line-height: 1.8;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 10px 17px;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: -.1px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            box-shadow: 0 7px 18px rgba(109, 40, 217, .18);
+            transition: transform .18s ease, filter .18s ease, border-color .18s ease, background .18s ease;
+        }
+
+        button:hover {
+            filter: brightness(1.12);
+            transform: translateY(-1px)
+        }
+
+        button:active {
+            transform: translateY(0)
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: 2px solid #c4b5fd;
+            outline-offset: 3px
+        }
+
+        button.secondary {
+            background: #20283c;
+            border-color: var(--line);
+            box-shadow: none;
+            color: #e3e8fa
+        }
+
+        button.secondary:hover {
+            background: #29334b
+        }
+
+        button.danger {
+            background: rgba(251, 113, 133, .14);
+            border-color: rgba(251, 113, 133, .25);
+            box-shadow: none;
+            color: #fecdd3
+        }
+
+        .wrap {
+            width: min(1200px, 100%);
+            margin: auto;
+            padding: 30px 24px 56px
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 26px;
+            padding: 14px 18px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(19, 24, 39, .78);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, .14)
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1.1px
+        }
+
+        .brand span {
+            color: #b8a1ff
+        }
+
+        #userbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+            gap: 18px
+        }
+
+        .panel,
+        .event {
+            min-width: 0;
+            background: linear-gradient(155deg, rgba(23, 30, 48, .96), rgba(17, 22, 36, .98));
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 16px 42px rgba(0, 0, 0, .18);
+        }
+
+        .panel h2,
+        .panel h3 {
+            margin-top: 0;
+            letter-spacing: -.4px
+        }
+
+        .panel h2 {
+            font-size: 21px
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 30px;
+            border-radius: 20px;
+            background: linear-gradient(125deg, rgba(109, 40, 217, .24), rgba(30, 41, 59, .72) 65%, rgba(14, 116, 144, .12));
+            border: 1px solid rgba(167, 139, 250, .23);
+            margin-bottom: 22px;
+        }
+
+        .hero:after {
+            content: "";
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            border: 1px solid rgba(196, 181, 253, .13);
+            left: -55px;
+            top: -85px;
+            box-shadow: 0 0 0 24px rgba(196, 181, 253, .025), 0 0 0 48px rgba(196, 181, 253, .02);
+            pointer-events: none
+        }
+
+        .hero h1 {
+            position: relative;
+            margin: 0 0 8px;
+            font-size: clamp(25px, 4vw, 38px);
+            line-height: 1.45;
+            letter-spacing: -.8px
+        }
+
+        .hero p {
+            margin: 8px 0 0
+        }
+
+        .formgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+            gap: 12px
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 14px;
+            min-width: 0
+        }
+
+        .field label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #d8def0
+        }
+
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            min-width: 0;
+            background: #0c1120;
+            border: 1px solid #303951;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 12px 13px;
+            outline: none;
+            transition: border-color .18s, box-shadow .18s;
+        }
+
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            border-color: #9b83ff;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, .13)
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: #65718c
+        }
+
+        textarea {
+            min-height: 105px;
+            resize: vertical
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            padding: 5px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #0e1321
+        }
+
+        .tabs button {
+            flex: 1;
+            box-shadow: none
+        }
+
+        .tabs button.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent2))
+        }
+
+        .notice {
+            padding: 12px 15px;
+            border-radius: 13px;
+            margin: 13px 0;
+            background: rgba(148, 163, 184, .07);
+            border: 1px solid var(--line);
+            color: #dce4f8
+        }
+
+        .notice.error {
+            border-color: rgba(251, 113, 133, .38);
+            background: rgba(251, 113, 133, .08);
+            color: #fecdd3
+        }
+
+        .notice.success {
+            border-color: rgba(52, 211, 153, .3);
+            background: rgba(52, 211, 153, .08);
+            color: #a7f3d0
+        }
+
+        .event {
+            display: flex;
+            flex-direction: column;
+            transition: transform .2s, border-color .2s, box-shadow .2s
+        }
+
+        .event:hover {
+            transform: translateY(-3px);
+            border-color: rgba(167, 139, 250, .38);
+            box-shadow: 0 20px 44px rgba(0, 0, 0, .24)
+        }
+
+        .event h3 {
+            margin: 0 0 8px;
+            font-size: 19px;
+            line-height: 1.5
+        }
+
+        .event p {
+            white-space: pre-wrap;
+            color: #c0c9de;
+            margin: 8px 0
+        }
+
+        .meta {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            gap: 9px 14px;
+            flex-wrap: wrap;
+            margin: 12px 0
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: auto;
+            padding-top: 14px
+        }
+
+        .actions button {
+            font-size: 13px;
+            padding: 8px 12px
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: max-content;
+            max-width: 100%;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #283249;
+            border: 1px solid var(--line);
+            color: #dbe5ff;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .badge.finished {
+            background: rgba(52, 211, 153, .1);
+            border-color: rgba(52, 211, 153, .2);
+            color: #a7f3d0
+        }
+
+        .badge.published {
+            background: rgba(56, 189, 248, .1);
+            border-color: rgba(56, 189, 248, .22);
+            color: #bae6fd
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 32px 0 15px
+        }
+
+        .section-title h2 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: -.4px
+        }
+
+        .stars {
+            color: var(--gold);
+            font-size: 20px;
+            letter-spacing: 2px
+        }
+
+        .empty {
+            grid-column: 1/-1;
+            padding: 32px 20px;
+            text-align: center;
+            border: 1px dashed #3a4560;
+            border-radius: 18px;
+            color: var(--muted);
+            background: rgba(19, 24, 39, .5)
+        }
+
+        .small {
+            font-size: 12px
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--line);
+            margin: 18px 0
+        }
+
+        #authSection .panel:first-child {
+            padding: 24px
+        }
+
+        #authSection .panel:first-child .hero {
+            margin: -2px -2px 22px
+        }
+
+        #authSection .panel:nth-child(2) {
+            display: flex;
+            flex-direction: column;
+            justify-content: center
+        }
+
+        #authSection .panel:nth-child(2) p {
+            margin: 9px 0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, .055)
+        }
+
+        #appSection>.hero {
+            margin-bottom: 20px
+        }
+
+        @media(max-width:700px) {
+            .wrap {
+                padding: 14px 12px 36px
+            }
+
+            .top {
+                padding: 12px 14px;
+                border-radius: 15px
+            }
+
+            .brand {
+                font-size: 19px
+            }
+
+            .panel,
+            .event {
+                padding: 17px;
+                border-radius: 16px
+            }
+
+            .hero {
+                padding: 23px 20px;
+                border-radius: 16px
+            }
+
+            .section-title {
+                margin-top: 25px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *:before,
+            *:after {
+                scroll-behavior: auto !important;
+                transition: none !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="top">
+            <div class="brand">EVENT <span>PLANET</span></div>
+            <div id="userbar" class="hidden">
+                <span id="welcome" class="muted"></span>
+                <button class="secondary" id="logoutBtn">خروج</button>
+            </div>
+        </header>
+
+        <section id="authSection" class="grid">
+            <div class="panel">
+                <div class="hero">
+                    <h1>به Event Planet خوش آمدید</h1>
+                    <div class="muted">رویدادها را بسازید، پیدا کنید و در آن‌ها شرکت کنید.</div>
+                </div>
+                <div class="tabs">
+                    <button id="loginTab" class="active" type="button">ورود</button>
+                    <button id="registerTab" class="secondary" type="button">ثبت‌نام</button>
+                </div>
+                <div id="message" class="notice hidden"></div>
+                <form id="loginForm">
+                    <div class="field"><label for="loginUsername">نام کاربری</label><input id="loginUsername"
+                            autocomplete="username" required></div>
+                    <div class="field"><label for="loginPassword">رمز عبور</label><input id="loginPassword"
+                            type="password" autocomplete="current-password" required></div>
+                    <button type="submit">ورود به حساب</button>
+                </form>
+                <form id="registerForm" class="hidden">
+                    <div class="field"><label for="regUsername">نام کاربری</label><input id="regUsername"
+                            autocomplete="username" required minlength="3"></div>
+                    <div class="field"><label for="regEmail">ایمیل</label><input id="regEmail" type="email"
+                            autocomplete="email" required></div>
+                    <div class="field"><label for="regPassword">رمز عبور</label><input id="regPassword" type="password"
+                            autocomplete="new-password" required minlength="8"></div>
+                    <div class="field"><label for="regRole">نوع حساب</label><select id="regRole" required>
+                            <option value="participant">شرکت‌کننده</option>
+                            <option value="organizer">برگزارکننده</option>
+                        </select></div>
+                    <button type="submit">ثبت‌نام و ورود خودکار</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h2>چه کاری می‌توانید انجام دهید؟</h2>
+                <p>🗓️ مشاهده رویدادهای منتشرشده</p>
+                <p>🎟️ ثبت‌نام در رویداد به‌عنوان شرکت‌کننده</p>
+                <p>✍️ ثبت امتیاز و نظر بعد از پایان رویداد</p>
+                <p>📌 ساخت و مدیریت رویداد به‌عنوان برگزارکننده</p>
+                <div class="notice small">برای استفاده از امکانات، ابتدا وارد شوید یا یک حساب جدید بسازید.</div>
+            </div>
+        </section>
+
+        <main id="appSection" class="hidden">
+            <div class="hero">
+                <h1 id="dashboardTitle">داشبورد</h1>
+                <p id="dashboardSubtitle" class="muted">رویدادهای خود را مدیریت کنید.</p>
+            </div>
+            <div id="appMessage" class="notice hidden"></div>
+
+            <section id="organizerSection" class="panel hidden">
+                <h2>ایجاد رویداد جدید</h2>
+                <form id="eventForm">
+                    <div class="formgrid">
+                        <div class="field"><label for="eventTitle">عنوان رویداد</label><input id="eventTitle" required
+                                maxlength="200"></div>
+                        <div class="field"><label for="eventCapacity">ظرفیت</label><input id="eventCapacity"
+                                type="number" min="1" value="30" required></div>
+                        <div class="field"><label for="eventStart">زمان شروع</label><input id="eventStart"
+                                type="datetime-local" required></div>
+                        <div class="field"><label for="eventEnd">زمان پایان</label><input id="eventEnd"
+                                type="datetime-local" required></div>
+                    </div>
+                    <div class="field"><label for="eventDescription">توضیحات</label><textarea id="eventDescription"
+                            required></textarea></div>
+                    <button type="submit">ایجاد رویداد</button>
+                </form>
+                <p class="muted small">رویداد پس از ایجاد به‌صورت پیش‌نویس ذخیره می‌شود؛ برای نمایش به شرکت‌کنندگان آن
+                    را منتشر کنید.</p>
+            </section>
+
+            <div class="section-title">
+                <h2>رویدادها</h2><button id="refreshBtn" class="secondary" type="button">به‌روزرسانی</button>
+            </div>
+            <section id="eventsList" class="grid">
+                <div class="empty">در حال دریافت رویدادها…</div>
+            </section>
+
+            <div class="section-title">
+                <h2>ثبت‌نام‌های من</h2>
+            </div>
+            <section id="myRegistrations" class="grid">
+                <div class="empty">در حال دریافت اطلاعات…</div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        (() => {
+            "use strict";
+            const API = "/api";
+            const ENDPOINTS = {
+                register: `${API}/register/`,
+                login: `${API}/login/`,
+                events: `${API}/events/`,
+                registrations: `${API}/registrations/`,
+                feedback: `${API}/feedback/`
+            };
+            const $ = id => document.getElementById(id);
+            let currentUser = readUser();
+
+            function readUser() {
+                try {
+                    const token = localStorage.getItem("eventPlanetToken");
+                    const raw = localStorage.getItem("eventPlanetUser");
+                    return token && raw ? { ...JSON.parse(raw), token } : null;
+                } catch { return null; }
+            }
+            function saveUser(user, token) {
+                localStorage.setItem("eventPlanetToken", token);
+                const safe = { id: user.user_id ?? user.id ?? null, username: user.username, email: user.email ?? "", role: user.role };
+                localStorage.setItem("eventPlanetUser", JSON.stringify(safe));
+                currentUser = { ...safe, token };
+            }
+            function clearUser() {
+                localStorage.removeItem("eventPlanetToken");
+                localStorage.removeItem("eventPlanetUser");
+                currentUser = null;
+            }
+            function showMessage(text, type = "success", target = "message") {
+                const el = $(target);
+                el.textContent = text;
+                el.className = `notice ${type}`;
+                el.classList.remove("hidden");
+            }
+            function hideMessage(target = "message") { $(target).classList.add("hidden"); }
+            function switchAuth(mode) {
+                const login = mode === "login";
+                $("loginForm").classList.toggle("hidden", !login);
+                $("registerForm").classList.toggle("hidden", login);
+                $("loginTab").classList.toggle("active", login);
+                $("registerTab").classList.toggle("active", !login);
+                $("loginTab").classList.toggle("secondary", !login);
+                $("registerTab").classList.toggle("secondary", login);
+                hideMessage();
+            }
+            function escapeHTML(value) {
+                return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+            }
+            function dateText(value) {
+                if (!value) return "مشخص نشده";
+                const d = new Date(value);
+                return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString("fa-IR");
+            }
+            function statusText(status) {
+                const s = String(status || "draft").toLowerCase();
+                const labels = { draft: "پیش‌نویس", published: "منتشرشده", finished: "پایان‌یافته", cancelled: "لغوشده", canceled: "لغوشده" };
+                return labels[s] || s;
+            }
+            function authHeaders(json = true) {
+                const headers = {};
+                if (json) headers["Content-Type"] = "application/json";
+                if (currentUser?.token) headers["Authorization"] = `Token ${currentUser.token}`;
+                return headers;
+            }
+            async function api(url, options = {}) {
+                const response = await fetch(url, { ...options, headers: { ...authHeaders(options.body !== undefined), ...(options.headers || {}) } });
+                const raw = await response.text();
+                let data = {};
+                try { data = raw ? JSON.parse(raw) : {}; } catch { data = { detail: raw }; }
+                if (!response.ok) {
+                    let message = data.detail || data.error || data.message;
+                    if (!message && typeof data === "object") message = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v}`).join(" | ");
+                    throw new Error(message || `خطای سرور (${response.status})`);
+                }
+                return data;
+            }
+            async function login(username, password) {
+                const data = await api(ENDPOINTS.login, { method: "POST", body: JSON.stringify({ username, password }) });
+                if (!data.token) throw new Error("ورود انجام شد اما سرور توکن برنگرداند. پاسخ API ورود را بررسی کنید.");
+                if (!data.role) throw new Error("ورود انجام شد اما نقش کاربر در پاسخ API نیست. پاسخ باید شامل role باشد.");
+                saveUser(data, data.token);
+                showApp();
+                await refreshDashboard();
+            }
+            function showApp() {
+                $("authSection").classList.add("hidden");
+                $("appSection").classList.remove("hidden");
+                $("userbar").classList.remove("hidden");
+                $("welcome").textContent = `سلام ${currentUser.username} | ${currentUser.role === "organizer" ? "برگزارکننده" : "شرکت‌کننده"}`;
+                const organizer = currentUser.role === "organizer";
+                $("organizerSection").classList.toggle("hidden", !organizer);
+                $("dashboardTitle").textContent = organizer ? "داشبورد برگزارکننده" : "داشبورد شرکت‌کننده";
+                $("dashboardSubtitle").textContent = organizer ? "رویداد بسازید و وضعیت آن‌ها را مدیریت کنید." : "رویدادها را ببینید، ثبت‌نام کنید و پس از پایان نظر بدهید.";
+            }
+            function showAuth() {
+                $("authSection").classList.remove("hidden");
+                $("appSection").classList.add("hidden");
+                $("userbar").classList.add("hidden");
+            }
+            function getArray(data) {
+                if (Array.isArray(data)) return data;
+                if (Array.isArray(data.results)) return data.results;
+                if (Array.isArray(data.events)) return data.events;
+                if (Array.isArray(data.registrations)) return data.registrations;
+                return [];
+            }
+            async function refreshDashboard() {
+                hideMessage("appMessage");
+                $("eventsList").innerHTML = '<div class="empty">در حال دریافت رویدادها…</div>';
+                $("myRegistrations").innerHTML = '<div class="empty">در حال دریافت اطلاعات…</div>';
+                try {
+                    const [eventsResult, regsResult] = await Promise.all([
+                        api(ENDPOINTS.events),
+                        api(ENDPOINTS.registrations).catch(() => [])
+                    ]);
+                    const events = getArray(eventsResult);
+                    const regs = getArray(regsResult);
+                    renderEvents(events, regs);
+                    renderRegistrations(regs, events);
+                } catch (err) {
+                    $("eventsList").innerHTML = '<div class="empty">دریافت رویدادها ناموفق بود.</div>';
+                    $("myRegistrations").innerHTML = '<div class="empty">اطلاعات ثبت‌نام دریافت نشد.</div>';
+                    showMessage(err.message, "error", "appMessage");
+                }
+            }
+            function renderEvents(events, registrations) {
+                const mine = new Set(registrations.map(r => String(r.event?.id ?? r.event_id ?? r.event)));
+                const visible = currentUser.role === "organizer"
+                    ? events.filter(e => Number(e.organizer?.id ?? e.organizer_id ?? e.organizer) === Number(currentUser.id) || !e.organizer)
+                    : events.filter(e => ["published", "finished"].includes(String(e.status || "").toLowerCase()));
+                if (!visible.length) {
+                    $("eventsList").innerHTML = '<div class="empty">فعلاً رویدادی برای نمایش وجود ندارد.</div>';
+                    return;
+                }
+                $("eventsList").innerHTML = visible.map(event => {
+                    const id = event.id;
+                    const status = String(event.status || "draft").toLowerCase();
+                    const isMine = mine.has(String(id));
+                    const canJoin = currentUser.role === "participant" && status === "published" && !isMine;
+                    const canReview = currentUser.role === "participant" && status === "finished" && isMine;
+                    const owner = currentUser.role === "organizer" && (Number(event.organizer?.id ?? event.organizer_id ?? event.organizer) === Number(currentUser.id) || !event.organizer);
+                    return `<article class="event">
+        <div class="meta"><span class="badge ${status}">${escapeHTML(statusText(status))}</span><span>ظرفیت: ${escapeHTML(event.capacity ?? "—")}</span></div>
+        <h3>${escapeHTML(event.title || "بدون عنوان")}</h3>
+        <p>${escapeHTML(event.description || "توضیحاتی ثبت نشده است.")}</p>
+        <div class="meta"><span>شروع: ${escapeHTML(dateText(event.start_time))}</span><span>پایان: ${escapeHTML(dateText(event.end_time))}</span></div>
+        <div class="actions">
+          ${canJoin ? `<button data-action="join" data-id="${escapeHTML(id)}">ثبت‌نام در رویداد</button>` : ""}
+          ${isMine && currentUser.role === "participant" ? '<span class="badge">ثبت‌نام کرده‌اید</span>' : ""}
+          ${canReview ? `<button data-action="review" data-id="${escapeHTML(id)}">ثبت نظر و امتیاز</button>` : ""}
+          ${owner && status === "draft" ? `<button data-action="publish" data-id="${escapeHTML(id)}">انتشار رویداد</button>` : ""}
+          ${owner && status === "published" ? `<button class="secondary" data-action="finish" data-id="${escapeHTML(id)}">پایان رویداد</button>` : ""}
+        </div>
+        <div id="review-${escapeHTML(id)}" class="hidden"></div>
+      </article>`;
+                }).join("");
+            }
+            function renderRegistrations(registrations, events) {
+                if (!registrations.length) {
+                    $("myRegistrations").innerHTML = '<div class="empty">هنوز در رویدادی ثبت‌نام نکرده‌اید.</div>';
+                    return;
+                }
+                $("myRegistrations").innerHTML = registrations.map(reg => {
+                    const eventId = reg.event?.id ?? reg.event_id ?? reg.event;
+                    const event = reg.event && typeof reg.event === "object" ? reg.event : events.find(e => String(e.id) === String(eventId));
+                    const status = String(event?.status || "").toLowerCase();
+                    const registrationId = reg.id;
+                    const feedbackExists = reg.feedback || reg.review || reg.has_feedback;
+                    return `<article class="event">
+        <h3>${escapeHTML(event?.title || `رویداد شماره ${eventId ?? "نامشخص"}`)}</h3>
+        <div class="meta"><span>وضعیت رویداد: ${escapeHTML(statusText(status))}</span><span>کد ثبت‌نام: ${escapeHTML(registrationId ?? "—")}</span></div>
+        ${status === "finished" && !feedbackExists ? `<button data-action="review" data-id="${escapeHTML(eventId)}" data-registration="${escapeHTML(registrationId)}">ثبت نظر و امتیاز</button>` : ""}
+        ${feedbackExists ? '<span class="badge finished">نظر ثبت شده</span>' : ""}
+      </article>`;
+                }).join("");
+            }
+            async function handleRegister(e) {
+                e.preventDefault();
+                hideMessage();
+                const username = $("regUsername").value.trim();
+                const email = $("regEmail").value.trim();
+                const password = $("regPassword").value;
+                const role = $("regRole").value;
+                try {
+                    await api(ENDPOINTS.register, { method: "POST", body: JSON.stringify({ username, email, password, role }) });
+                    showMessage("ثبت‌نام انجام شد؛ در حال ورود خودکار…", "success");
+                    await login(username, password);
+                    showMessage("حساب ساخته شد و با موفقیت وارد شدید.", "success", "appMessage");
+                } catch (err) {
+                    showMessage(`ثبت‌نام یا ورود خودکار انجام نشد: ${err.message}`, "error");
+                }
+            }
+            async function handleLogin(e) {
+                e.preventDefault();
+                hideMessage();
+                try {
+                    await login($("loginUsername").value.trim(), $("loginPassword").value);
+                } catch (err) {
+                    showMessage(err.message, "error");
+                }
+            }
+            async function handleCreateEvent(e) {
+                e.preventDefault();
+                hideMessage("appMessage");
+                const start = $("eventStart").value;
+                const end = $("eventEnd").value;
+                if (new Date(end) <= new Date(start)) {
+                    showMessage("زمان پایان باید بعد از زمان شروع باشد.", "error", "appMessage");
+                    return;
+                }
+                const payload = {
+                    title: $("eventTitle").value.trim(),
+                    description: $("eventDescription").value.trim(),
+                    start_time: new Date(start).toISOString(),
+                    end_time: new Date(end).toISOString(),
+                    capacity: Number($("eventCapacity").value)
+                };
+                try {
+                    await api(ENDPOINTS.events, { method: "POST", body: JSON.stringify(payload) });
+                    $("eventForm").reset();
+                    $("eventCapacity").value = 30;
+                    showMessage("رویداد ایجاد شد.", "success", "appMessage");
+                    await refreshDashboard();
+                } catch (err) { showMessage(`ایجاد رویداد ناموفق بود: ${err.message}`, "error", "appMessage"); }
+            }
+            async function joinEvent(id) {
+                try {
+                    await api(ENDPOINTS.registrations, { method: "POST", body: JSON.stringify({ event: Number(id) }) });
+                    showMessage("ثبت‌نام در رویداد با موفقیت انجام شد.", "success", "appMessage");
+                    await refreshDashboard();
+                } catch (err) { showMessage(`ثبت‌نام ناموفق بود: ${err.message}`, "error", "appMessage"); }
+            }
+            async function changeStatus(id, status) {
+                try {
+                    await api(`${ENDPOINTS.events}${id}/`, { method: "PATCH", body: JSON.stringify({ status }) });
+                    showMessage(status === "published" ? "رویداد منتشر شد." : "رویداد پایان‌یافته علامت‌گذاری شد.", "success", "appMessage");
+                    await refreshDashboard();
+                } catch (err) { showMessage(`تغییر وضعیت ناموفق بود: ${err.message}`, "error", "appMessage"); }
+            }
+            function openReview(id, registrationId) {
+                const container = $(`review-${id}`);
+                if (!container) return;
+                container.classList.remove("hidden");
+                container.innerHTML = `<div class="divider"></div><form data-review-form data-event="${escapeHTML(id)}" data-registration="${escapeHTML(registrationId ?? "")}">
+      <h3>ثبت نظر درباره رویداد</h3>
+      <div class="field"><label>امتیاز</label><select name="rating" required><option value="5">۵ - عالی</option><option value="4">۴ - خیلی خوب</option><option value="3">۳ - خوب</option><option value="2">۲ - معمولی</option><option value="1">۱ - ضعیف</option></select></div>
+      <div class="field"><label>نظر شما</label><textarea name="comment" required minlength="2" maxlength="2000"></textarea></div>
+      <button type="submit">ارسال نظر</button>
+    </form>`;
+                container.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            async function submitReview(form) {
+                const eventId = form.dataset.event;
+                const registrationId = form.dataset.registration;
+                const fd = new FormData(form);
+                const payload = { rating: Number(fd.get("rating")), comment: String(fd.get("comment")).trim() };
+                // API این پروژه بازخورد را با شناسه ثبت‌نام دریافت می‌کند.
+                if (registrationId) payload.registration = Number(registrationId);
+                else {
+                    try {
+                        const data = await api(ENDPOINTS.registrations);
+                        const regs = getArray(data);
+                        const match = regs.find(r => String(r.event?.id ?? r.event_id ?? r.event) === String(eventId));
+                        if (!match?.id) throw new Error("ثبت‌نام مربوط به این رویداد پیدا نشد.");
+                        payload.registration = Number(match.id);
+                    } catch (err) { showMessage(err.message, "error", "appMessage"); return; }
+                }
+                try {
+                    await api(ENDPOINTS.feedback, { method: "POST", body: JSON.stringify(payload) });
+                    showMessage("نظر شما با موفقیت ثبت شد.", "success", "appMessage");
+                    await refreshDashboard();
+                } catch (err) { showMessage(`ثبت نظر ناموفق بود: ${err.message}`, "error", "appMessage"); }
+            }
+            $("loginTab").addEventListener("click", () => switchAuth("login"));
+            $("registerTab").addEventListener("click", () => switchAuth("register"));
+            $("loginForm").addEventListener("submit", handleLogin);
+            $("registerForm").addEventListener("submit", handleRegister);
+            $("eventForm").addEventListener("submit", handleCreateEvent);
+            $("refreshBtn").addEventListener("click", refreshDashboard);
+            $("logoutBtn").addEventListener("click", () => { clearUser(); showAuth(); switchAuth("login"); showMessage("از حساب خارج شدید.", "success"); });
+            $("eventsList").addEventListener("click", e => {
+                const btn = e.target.closest("button[data-action]");
+                if (!btn) return;
+                const { action, id } = btn.dataset;
+                if (action === "join") joinEvent(id);
+                if (action === "publish") changeStatus(id, "published");
+                if (action === "finish") changeStatus(id, "finished");
+                if (action === "review") openReview(id, btn.dataset.registration);
+            });
+            $("myRegistrations").addEventListener("click", e => {
+                const btn = e.target.closest("button[data-action='review']");
+                if (btn) {
+                    const id = btn.dataset.id;
+                    let container = $(`review-${id}`);
+                    if (!container) {
+                        const card = btn.closest(".event");
+                        container = document.createElement("div");
+                        container.id = `review-${id}`;
+                        card.appendChild(container);
+                    }
+                    // Render a review form in the registration card if it is not part of the event card.
+                    container.classList.remove("hidden");
+                    container.innerHTML = `<div class="divider"></div><form data-review-form data-event="${escapeHTML(id)}" data-registration="${escapeHTML(btn.dataset.registration)}">
+        <h3>ثبت نظر درباره رویداد</h3>
+        <div class="field"><label>امتیاز</label><select name="rating" required><option value="5">۵ - عالی</option><option value="4">۴ - خیلی خوب</option><option value="3">۳ - خوب</option><option value="2">۲ - معمولی</option><option value="1">۱ - ضعیف</option></select></div>
+        <div class="field"><label>نظر شما</label><textarea name="comment" required minlength="2" maxlength="2000"></textarea></div>
+        <button type="submit">ارسال نظر</button></form>`;
+                }
+            });
+            document.addEventListener("submit", e => {
+                const form = e.target.closest("form[data-review-form]");
+                if (form) { e.preventDefault(); submitReview(form); }
+            });
+            if (currentUser) {
+                showApp();
+                refreshDashboard();
+            } else {
+                showAuth();
+            }
+        })();
+    </script>
+</body>
+
+</html>
